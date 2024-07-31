@@ -79,15 +79,19 @@ namespace Coffee.UISoftMask
 
         [SerializeField]
         [Obsolete]
-        private float m_Softness = -1;
+        internal float m_Alpha = -1;
+
+        [SerializeField]
+        [Obsolete]
+        internal float m_Softness = -1;
 
         [SerializeField]
         [Obsolete]
         private bool m_PartOfParent;
 
+        private CanvasGroup _canvasGroup;
         private CommandBuffer _cb;
-
-        private List<SoftMask> _children = ListPool<SoftMask>.Rent();
+        private List<SoftMask> _children;
         private bool _hasResolutionChanged;
         private bool _hasSoftMaskBufferDrawn;
         private Mesh _mesh;
@@ -103,6 +107,7 @@ namespace Coffee.UISoftMask
         internal RenderTexture _softMaskBuffer;
         private UnityAction _updateParentSoftMask;
         private CanvasViewChangeTrigger _viewChangeTrigger;
+        private List<SoftMask> children => _children != null ? _children : _children = ListPool<SoftMask>.Rent();
 
         /// <summary>
         /// Masking mode.<br />
@@ -254,6 +259,27 @@ namespace Coffee.UISoftMask
         }
 
         /// <summary>
+        /// The transparency of the masking graphic.
+        /// </summary>
+        public float alpha
+        {
+            get => graphic ? graphic.color.a : 1;
+            set
+            {
+                value = Mathf.Clamp01(value);
+                if (!this || Mathf.Approximately(alpha, value)) return;
+
+                isDirty = true;
+                if (graphic)
+                {
+                    var color = graphic.color;
+                    color.a = value;
+                    graphic.color = color;
+                }
+            }
+        }
+
+        /// <summary>
         /// Clear color for the soft mask buffer.
         /// </summary>
         public Color clearColor
@@ -314,7 +340,7 @@ namespace Coffee.UISoftMask
             }
 
             UpdateParentSoftMask(null);
-            _children.Clear();
+            children.Clear();
 
             MeshExtensions.Return(ref _mesh);
             SoftMaskUtils.materialPropertyBlockPool.Return(ref _mpb);
@@ -437,6 +463,7 @@ namespace Coffee.UISoftMask
         {
             if (!SoftMaskingEnabled() || !_softMaskBuffer) return;
 
+            Logging.Log(this, "SetDirtyAndNotifyIfBufferSizeChanged");
             var size = RenderTextureRepository.GetScreenSize((int)downSamplingRate);
             var hash = new Hash128((uint)GetInstanceID(), (uint)size.x, (uint)size.y, 0);
             if (RenderTextureRepository.Valid(hash, _softMaskBuffer)) return;
@@ -449,7 +476,7 @@ namespace Coffee.UISoftMask
         {
             if (!isActiveAndEnabled || !SoftMaskingEnabled()) return;
 
-            this.AddComponentOnChildren<SoftMaskable>(HideFlags.DontSave | HideFlags.NotEditable, true);
+            this.AddComponentOnChildren<SoftMaskable>(UISoftMaskProjectSettings.hideFlagsForTemp, true);
         }
 
         private void OnBeforeCanvasRebuild()
@@ -459,7 +486,6 @@ namespace Coffee.UISoftMask
                 // SoftMasking mode: If transform or view has changed, set dirty flag.
                 case MaskingMode.SoftMasking:
                 {
-                    SetDirtyAndNotifyIfBufferSizeChanged();
                     if (transform.HasChanged(ref _prevTransformMatrix, UISoftMaskProjectSettings.sensitivity))
                     {
                         SetSoftMaskDirty();
@@ -576,7 +602,7 @@ namespace Coffee.UISoftMask
         private void OnCanvasViewChanged()
         {
             _hasResolutionChanged = true;
-            SetSoftMaskDirty();
+            SetDirtyAndNotify();
 
 #if UNITY_EDITOR
             if (!Application.isPlaying)
@@ -588,19 +614,19 @@ namespace Coffee.UISoftMask
 
         public void SetSoftMaskDirty()
         {
-            if (isDirty) return;
+            if (isDirty || !this || !isActiveAndEnabled) return;
 
             Logging.LogIf(!isDirty, this, $"! SetSoftMaskDirty {GetInstanceID()}");
             isDirty = true;
-            for (var i = _children.Count - 1; i >= 0; i--)
+            for (var i = children.Count - 1; i >= 0; i--)
             {
-                if (_children[i])
+                if (children[i])
                 {
-                    _children[i].SetSoftMaskDirty();
+                    children[i].SetSoftMaskDirty();
                 }
                 else
                 {
-                    _children.RemoveAt(i);
+                    children.RemoveAt(i);
                 }
             }
         }
@@ -641,14 +667,14 @@ namespace Coffee.UISoftMask
 
         private void UpdateParentSoftMask(SoftMask newParent)
         {
-            if (_parent && _parent._children.Contains(this))
+            if (_parent && _parent.children.Contains(this))
             {
-                _parent._children.Remove(this);
+                _parent.children.Remove(this);
             }
 
-            if (newParent && !newParent._children.Contains(this))
+            if (newParent && !newParent.children.Contains(this))
             {
-                newParent._children.Add(this);
+                newParent.children.Add(this);
             }
 
             if (_parent != newParent)
@@ -779,7 +805,7 @@ namespace Coffee.UISoftMask
 
                 Profiler.BeginSample("(SM4UI)[SoftMask] RenderSoftMaskBuffer > ApplyMaterialPropertyBlock");
                 var texture = graphic.mainTexture;
-                SoftMaskUtils.ApplyMaterialPropertyBlock(_mpb, softMaskDepth, texture, softnessRange);
+                SoftMaskUtils.ApplyMaterialPropertyBlock(_mpb, softMaskDepth, texture, softnessRange, alpha);
                 Profiler.EndSample();
             }
 

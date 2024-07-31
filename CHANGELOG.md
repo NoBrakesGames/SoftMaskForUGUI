@@ -1,3 +1,41 @@
+## [2.1.3](https://github.com/mob-sakai/SoftMaskForUGUI/compare/v2.1.2...v2.1.3) (2024-07-26)
+
+
+### Bug Fixes
+
+* soft mask buffer is fliped on UNITY_UV_STARTS_AT_TOP devices ([e9c7822](https://github.com/mob-sakai/SoftMaskForUGUI/commit/e9c782287065adca628a32a6222adab4210e73fd)), closes [#179](https://github.com/mob-sakai/SoftMaskForUGUI/issues/179)
+
+## [2.1.2](https://github.com/mob-sakai/SoftMaskForUGUI/compare/v2.1.1...v2.1.2) (2024-07-25)
+
+
+### Bug Fixes
+
+* shaders for SoftMask are not automatically included ([3a37659](https://github.com/mob-sakai/SoftMaskForUGUI/commit/3a376595d15ba1c7229e009e50f7cc84214d7093)), closes [#177](https://github.com/mob-sakai/SoftMaskForUGUI/issues/177) [#178](https://github.com/mob-sakai/SoftMaskForUGUI/issues/178)
+
+## [2.1.1](https://github.com/mob-sakai/SoftMaskForUGUI/compare/v2.1.0...v2.1.1) (2024-07-24)
+
+
+### Bug Fixes
+
+* flashing when SoftnessRange is changed in inspector ([d1c6235](https://github.com/mob-sakai/SoftMaskForUGUI/commit/d1c623588c5cfd37aa8f23c57d5e15f397049eda))
+
+# [2.1.0](https://github.com/mob-sakai/SoftMaskForUGUI/compare/v2.0.0...v2.1.0) (2024-07-23)
+
+
+### Bug Fixes
+
+* fix null exception ([15d6917](https://github.com/mob-sakai/SoftMaskForUGUI/commit/15d6917e80a58f35deabcbf7b8f3b8697f498d71))
+* fix upgrading asset system (v1 to v2) ([e6d0c60](https://github.com/mob-sakai/SoftMaskForUGUI/commit/e6d0c60edf63fe71c1cf8457a8e22c20485711bb))
+* support 'Apply display rotation during rendering' for Vulkan (experimental) ([f5c9b41](https://github.com/mob-sakai/SoftMaskForUGUI/commit/f5c9b414d420ce978e509af643ae51f92c1078d1)), closes [#171](https://github.com/mob-sakai/SoftMaskForUGUI/issues/171)
+
+
+### Features
+
+* add 'Hide Generated Components' option in project settings ([053e92b](https://github.com/mob-sakai/SoftMaskForUGUI/commit/053e92ba7a063b7a354dea19aefd1839e665c96a))
+* add a help box to the auto-generated object inspector ([f2d2115](https://github.com/mob-sakai/SoftMaskForUGUI/commit/f2d211538d07427fc2a5c8ba2063f2ee944057db)), closes [#175](https://github.com/mob-sakai/SoftMaskForUGUI/issues/175)
+* revive `SoftMask.alpha` ([8080cb2](https://github.com/mob-sakai/SoftMaskForUGUI/commit/8080cb24091ec49511e28c3c5ed92ff3477b5867)), closes [#172](https://github.com/mob-sakai/SoftMaskForUGUI/issues/172)
+* softmask buffers are now baked considering `Graphic.color.a` ([2eaaad6](https://github.com/mob-sakai/SoftMaskForUGUI/commit/2eaaad639673f440e096fd1ab529607d88fd5ba0))
+
 # [2.0.0](https://github.com/mob-sakai/SoftMaskForUGUI/compare/v1.0.2...v2.0.0) (2024-07-17)
 
 

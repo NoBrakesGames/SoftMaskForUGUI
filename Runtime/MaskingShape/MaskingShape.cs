@@ -136,6 +136,26 @@ namespace Coffee.UISoftMask
             }
         }
 
+        /// <summary>
+        /// The transparency of the masking graphic.
+        /// </summary>
+        public float alpha
+        {
+            get => graphic ? graphic.color.a : 1;
+            set
+            {
+                value = Mathf.Clamp01(value);
+                if (!this || Mathf.Approximately(alpha, value)) return;
+
+                if (graphic)
+                {
+                    var color = graphic.color;
+                    color.a = value;
+                    graphic.color = color;
+                }
+            }
+        }
+
         protected override void OnEnable()
         {
             UpdateContainer();
@@ -408,7 +428,7 @@ namespace Coffee.UISoftMask
                 _mpb = SoftMaskUtils.materialPropertyBlockPool.Rent();
             }
 
-            SoftMaskUtils.ApplyMaterialPropertyBlock(_mpb, depth, texture, softnessRange);
+            SoftMaskUtils.ApplyMaterialPropertyBlock(_mpb, depth, texture, softnessRange, alpha);
             var softMaterial = SoftMaskUtils.GetSoftMaskingMaterial(maskingMethod);
 
             cb.DrawMesh(mesh, transform.localToWorldMatrix, softMaterial, 0, 0, _mpb);

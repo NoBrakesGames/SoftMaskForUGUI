@@ -97,7 +97,7 @@ namespace Coffee.UISoftMask
             for (var i = 0; i < subMeshes.Count; i++)
             {
                 var maskingShape = subMeshes[i].GetOrAddComponent<MaskingShape>();
-                maskingShape.hideFlags = HideFlags.DontSave | HideFlags.NotEditable;
+                maskingShape.hideFlags = UISoftMaskProjectSettings.hideFlagsForTemp;
                 maskingShape.antiAliasingThreshold = aa;
                 maskingShape.softnessRange = softness;
                 maskingShape.showMaskGraphic = show;
@@ -111,11 +111,11 @@ namespace Coffee.UISoftMask
         /// Applies properties to a MaterialPropertyBlock for soft masking.
         /// </summary>
         public static void ApplyMaterialPropertyBlock(MaterialPropertyBlock mpb, int depth, Texture texture,
-            MinMax01 threshold)
+            MinMax01 threshold, float alpha)
         {
             Profiler.BeginSample("(SM4UI)[SoftMaskUtils] ApplyMaterialPropertyBlock");
             var colorMask = Vector4.zero;
-            colorMask[depth] = 1;
+            colorMask[depth] = alpha;
             mpb.SetVector(s_ColorMask, colorMask);
             mpb.SetTexture(s_MainTex, texture ? texture : null);
             mpb.SetFloat(s_ThresholdMin, threshold.min);
@@ -142,7 +142,7 @@ namespace Coffee.UISoftMask
 
             mat = new Material(Shader.Find("Hidden/UI/SoftMask"))
             {
-                hideFlags = HideFlags.DontSave
+                hideFlags = HideFlags.DontSave | HideFlags.NotEditable
             };
             mat.SetInt(s_BlendOp, (int)op);
             return mat;
